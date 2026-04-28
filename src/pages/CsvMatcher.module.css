@@ -1,0 +1,148 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.uploadGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color var(--transition);
+}
+
+.textarea:focus {
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.input:focus {
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.runBtn {
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  background: var(--text-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: -0.01em;
+}
+
+.runBtn:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.runBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.runBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.results {
+  animation: fadeUp 0.3s ease;
+}
+
+.resultsHeader {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.resultsTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.resultsSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.jobsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .formCard { padding: 20px 16px; }
+  .uploadGrid { grid-template-columns: 1fr; }
+}
