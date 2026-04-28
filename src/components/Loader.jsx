@@ -1,6 +1,6 @@
 import styles from './Loader.module.css'
 
-export default function Loader({ message = 'Analyzing with Gemini AI...' }) {
+export default function Loader({ message = 'Analyzing with Groq AI...' }) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.spinner} />

@@ -109,7 +109,7 @@ Return ONLY valid JSON, no markdown, no backticks:
   ],
   "strengths": [
     "7+ years of frontend experience with live React v19 deployments",
-    "Strong AI tooling and Gemini custom expert experience",
+    "Strong AI tooling and AI tooling and prompt engineering experience",
     "Proven team leadership and cross-functional collaboration"
   ],
   "gaps": [
@@ -123,7 +123,7 @@ Return ONLY valid JSON, no markdown, no backticks:
       const raw = await callGemini(prompt)
       const parsed = safeParseJSON(raw)
       if (!parsed || typeof parsed !== 'object') {
-        setError('Could not parse Gemini response. Please try again.')
+        setError('Could not parse response. Please try again.')
         setLoading(false)
         return
       }

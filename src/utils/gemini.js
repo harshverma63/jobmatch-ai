@@ -28,29 +28,43 @@ export function safeParseJSON(text) {
 }
 
 export function buildJobLinks(company, role) {
-  const q = encodeURIComponent(`${company} ${role}`)
-  const co = encodeURIComponent(company)
-  const ro = encodeURIComponent(role)
+  const companyClean = company.trim()
+  const roleClean = role.trim()
+  const q = encodeURIComponent(`${companyClean} ${roleClean}`)
+  const co = encodeURIComponent(companyClean)
+  const ro = encodeURIComponent(roleClean)
+  const slug = companyClean.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
+
   return [
     {
-      label: 'LinkedIn',
-      url: `https://www.linkedin.com/jobs/search/?keywords=${q}`,
-      icon: 'li',
-    },
-    {
-      label: 'Indeed',
-      url: `https://www.indeed.com/jobs?q=${ro}+${co}`,
-      icon: 'in',
-    },
-    {
-      label: 'Glassdoor',
-      url: `https://www.glassdoor.com/Jobs/index.htm?typedKeyword=${q}`,
-      icon: 'gd',
+      label: 'Apply on LinkedIn',
+      url: `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(roleClean + ' ' + companyClean)}&sortBy=DD`,
+      primary: true,
     },
     {
       label: 'Google Jobs',
-      url: `https://www.google.com/search?q=${q}+jobs+site:careers.*+OR+site:jobs.*`,
-      icon: 'go',
+      url: `https://www.google.com/search?q=${encodeURIComponent(companyClean + ' ' + roleClean + ' job opening')}&ibp=htl;jobs`,
+      primary: true,
+    },
+    {
+      label: 'Wellfound',
+      url: `https://wellfound.com/jobs?q=${ro}&company=${co}`,
+      primary: false,
+    },
+    {
+      label: 'Indeed',
+      url: `https://www.indeed.com/jobs?q=${encodeURIComponent('"' + companyClean + '" ' + roleClean)}&sort=date`,
+      primary: false,
+    },
+    {
+      label: 'Glassdoor',
+      url: `https://www.glassdoor.com/Job/jobs.htm?typedKeyword=${q}`,
+      primary: false,
+    },
+    {
+      label: 'Official Careers',
+      url: `https://www.google.com/search?q=${encodeURIComponent(companyClean + ' careers ' + roleClean + ' apply')}`,
+      primary: false,
     },
   ]
 }

@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import Papa from 'papaparse'
 import UploadZone from '../components/UploadZone'
 import CategoryFilter from '../components/CategoryFilter'
 import JobCard from '../components/JobCard'
@@ -17,7 +16,7 @@ function readFileAsText(file) {
   })
 }
 
-export default function CsvMatcher() {
+export default function CsvMatcher({ onApply, hasApplied }) {
   const [csvFile, setCsvFile] = useState(null)
   const [cvFile, setCvFile] = useState(null)
   const [cvText, setCvText] = useState('')
@@ -45,7 +44,7 @@ export default function CsvMatcher() {
     setError('')
     try {
       if (file.type === 'application/pdf') {
-        cvContentRef.current = `[PDF uploaded: ${file.name} — please also paste CV text below for best results]`
+        cvContentRef.current = `[PDF: ${file.name} — paste CV text below for best results]`
       } else {
         const text = await readFileAsText(file)
         cvContentRef.current = text
@@ -67,38 +66,39 @@ export default function CsvMatcher() {
 
     const catFilter = categories.length > 0 && !categories.includes('Any')
       ? categories.join(', ')
-      : 'any type (startup, big tech, FAANG — all are welcome)'
+      : 'any type — startups, big tech, FAANG, all welcome'
 
-    const csvPreview = csvContentRef.current.slice(0, 9000)
+    const csvPreview = csvContentRef.current.slice(0, 12000)
     const cvPreview = finalCv.slice(0, 3500)
     const targetRole = role.trim() || 'Frontend Engineer / React Developer'
 
-    const prompt = `You are an expert job-matching AI. Your task is to analyze a company list and a candidate's CV, then return the best-matched companies sorted by alignment score.
+    const prompt = `You are an expert job-matching AI. Analyze a company list CSV and a candidate CV, return the best-matched companies ranked by alignment score.
 
 CANDIDATE CV:
 ${cvPreview}
 
 TARGET ROLE: ${targetRole}
-PREFERRED COMPANY CATEGORIES: ${catFilter}
+PREFERRED CATEGORIES: ${catFilter}
 
-COMPANY LIST (CSV DATA):
+COMPANY LIST CSV:
 ${csvPreview}
 
-TASK:
-1. Parse the CSV and extract all company names (look for columns like "Company", "Name", "Organization", "Startup" etc.)
-2. For each company, determine its industry/category based on its name or any description in the CSV
-3. If category filter is specified (not "any"), include only companies that match
-4. Score each company 0-100 for likelihood of hiring this candidate for the target role
-5. Suggest the most fitting job title at that company for this candidate
-6. Estimate salary range (INR lakhs per annum preferred since candidate is in India, or USD if unknown)
+INSTRUCTIONS:
+1. Parse ALL company names from the CSV (columns may be named: Company, Name, Organization, Startup, etc.)
+2. Identify each company's industry/category
+3. Filter by category if specified
+4. Score each company 0-100 for likelihood of hiring this candidate
+5. Suggest the best-fit job title for this candidate at each company
+6. Estimate salary in INR LPA (candidate is based in India)
 7. Estimate employment type: Full-time / Part-time / Contract
 8. Estimate remote policy: Remote / Hybrid / On-site
-9. List 3-5 CV skill tags that match the likely role requirements (matchedTags)
-10. List 1-2 skill gaps (missingTags) — skills common for the role not visible in CV
-11. Write one sentence explaining WHY this is a match
-12. Return TOP 15 results sorted by score descending
+9. List 3-5 matched skill tags from the CV
+10. List 1-2 missing skill tags (gaps)
+11. Write 2-3 bullet points as jobDescription explaining what this role likely involves at this company
+12. Write a one-sentence reason explaining why this is a match
+13. Return TOP 50 results sorted by score descending
 
-IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation, no backticks.
+Return ONLY a valid JSON array. No markdown, no explanation, no backticks:
 
 [
   {
@@ -111,7 +111,8 @@ IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation, no backt
     "remote": "Hybrid",
     "matchedTags": ["React JS", "REST API", "Responsive Design", "Figma", "JavaScript ES6+"],
     "missingTags": ["TypeScript"],
-    "reason": "Strong React and AI tooling experience aligns with their product engineering team."
+    "reason": "Strong React and AI tooling experience aligns with their product engineering team.",
+    "jobDescription": "Build and maintain React-based frontend applications. Collaborate with product and design teams. Integrate REST APIs and optimize for performance and accessibility."
   }
 ]`
 
@@ -119,7 +120,7 @@ IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation, no backt
       const raw = await callGemini(prompt)
       const parsed = safeParseJSON(raw)
       if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-        setError('Gemini returned an unexpected response. Try again or check your CSV format — make sure it has a company name column.')
+        setError('Could not parse response. Try again or check your CSV has a company name column.')
         setLoading(false)
         return
       }
@@ -133,7 +134,6 @@ IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation, no backt
   return (
     <div className={styles.container}>
       <div className={styles.formCard}>
-
         <div className={styles.uploadGrid}>
           <UploadZone
             label="Company list"
@@ -183,28 +183,28 @@ IMPORTANT: Return ONLY a valid JSON array. No markdown, no explanation, no backt
 
         <ErrorMessage message={error} />
 
-        <button
-          className={styles.runBtn}
-          onClick={handleRun}
-          disabled={loading}
-        >
+        <button className={styles.runBtn} onClick={handleRun} disabled={loading}>
           {loading ? 'Analyzing...' : 'Find Matching Jobs ↗'}
         </button>
       </div>
 
-      {loading && <Loader message="Reading company list and matching with your CV..." />}
+      {loading && <Loader message="Scanning company list and matching with your CV..." />}
 
       {!loading && jobs.length > 0 && (
         <div className={styles.results}>
           <div className={styles.resultsHeader}>
-            <div className={styles.resultsTitle}>
-              {jobs.length} matching companies found
-            </div>
-            <div className={styles.resultsSub}>Sorted by CV alignment score — highest first</div>
+            <div className={styles.resultsTitle}>{jobs.length} matching companies found</div>
+            <div className={styles.resultsSub}>Sorted by CV alignment — click Job Description to expand details · Apply Now opens the best job link</div>
           </div>
           <div className={styles.jobsList}>
             {jobs.map((job, i) => (
-              <JobCard key={`${job.company}-${i}`} job={job} index={i} />
+              <JobCard
+                key={`${job.company}-${i}`}
+                job={job}
+                index={i}
+                onApply={onApply}
+                hasApplied={hasApplied}
+              />
             ))}
           </div>
         </div>
