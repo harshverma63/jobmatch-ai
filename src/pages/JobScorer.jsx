@@ -94,7 +94,7 @@ ANALYSIS TASKS:
 8. List top 2 gaps the candidate should address
 9. Write a 2-sentence overall fit summary
 
-Return ONLY valid JSON, no markdown, no backticks:
+Return ONLY a valid JSON object, no markdown, no backticks:
 {
   "company": "Company Name",
   "role": "Job Title",

@@ -15,16 +15,42 @@ export async function callGemini(prompt) {
 }
 
 export function safeParseJSON(text) {
+  if (!text) return null
   try {
+    // 1. Try direct parse first
+    const direct = JSON.parse(text.trim())
+    // If wrapped object with a results/jobs/data key, unwrap it
+    if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
+      const key = Object.keys(direct)[0]
+      const val = direct[key]
+      if (Array.isArray(val)) return val
+      return direct
+    }
+    return direct
+  } catch {}
+
+  try {
+    // 2. Strip markdown fences
     const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-    const cleaned = fenced ? fenced[1] : text
+    const cleaned = fenced ? fenced[1].trim() : text.trim()
+
+    // 3. Try to find JSON array
     const arrMatch = cleaned.match(/(\[[\s\S]*\])/)
+    if (arrMatch) return JSON.parse(arrMatch[1])
+
+    // 4. Try to find JSON object
     const objMatch = cleaned.match(/(\{[\s\S]*\})/)
-    const candidate = arrMatch?.[1] || objMatch?.[1] || cleaned
-    return JSON.parse(candidate.trim())
-  } catch {
-    return null
-  }
+    if (objMatch) {
+      const parsed = JSON.parse(objMatch[1])
+      // Unwrap if needed
+      if (Array.isArray(parsed)) return parsed
+      const key = Object.keys(parsed)[0]
+      if (Array.isArray(parsed[key])) return parsed[key]
+      return parsed
+    }
+  } catch {}
+
+  return null
 }
 
 export function buildJobLinks(company, role) {
@@ -33,7 +59,6 @@ export function buildJobLinks(company, role) {
   const q = encodeURIComponent(`${companyClean} ${roleClean}`)
   const co = encodeURIComponent(companyClean)
   const ro = encodeURIComponent(roleClean)
-  const slug = companyClean.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
 
   return [
     {

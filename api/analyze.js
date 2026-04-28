@@ -7,11 +7,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.GROQ_API_KEY
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'GROQ_API_KEY environment variable is not set on the server.' })
-  }
-
-  if (!apiKey.startsWith('gsk_')) {
-    return res.status(500).json({ error: `API key format wrong. Key starts with: "${apiKey.slice(0, 6)}..." — should start with gsk_` })
+    return res.status(500).json({ error: 'GROQ_API_KEY is not set on the server.' })
   }
 
   try {
@@ -23,9 +19,19 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.2,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a job matching AI. You MUST respond with ONLY a valid JSON array or object. No explanation, no markdown, no backticks, no text before or after. Just raw JSON.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.1,
         max_tokens: 4096,
+        response_format: { type: 'json_object' },
       }),
     })
 
@@ -35,13 +41,12 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json()
+    const text = data.choices?.[0]?.message?.content || ''
 
     return res.status(200).json({
       candidates: [{
         content: {
-          parts: [{
-            text: data.choices?.[0]?.message?.content || ''
-          }]
+          parts: [{ text }]
         }
       }]
     })

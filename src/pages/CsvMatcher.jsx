@@ -98,9 +98,9 @@ INSTRUCTIONS:
 12. Write a one-sentence reason explaining why this is a match
 13. Return TOP 50 results sorted by score descending
 
-Return ONLY a valid JSON array. No markdown, no explanation, no backticks:
+Return a JSON object with a "results" key containing the array. No markdown, no explanation, no backticks:
 
-[
+{ "results": [
   {
     "company": "Company Name",
     "category": "SaaS",
@@ -114,7 +114,7 @@ Return ONLY a valid JSON array. No markdown, no explanation, no backticks:
     "reason": "Strong React and AI tooling experience aligns with their product engineering team.",
     "jobDescription": "Build and maintain React-based frontend applications. Collaborate with product and design teams. Integrate REST APIs and optimize for performance and accessibility."
   }
-]`
+] }` 
 
     try {
       const raw = await callGemini(prompt)
